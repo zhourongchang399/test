@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.example.mapper.DialogsManagerMapper">
+
+    <delete id="deleteDialog">
+        delete from dialogs where hostUserId = #{hostUserId} and userId = #{userId}
+    </delete>
+
+    <delete id="deleteDialogGroup">
+        delete from dialogs where hostUserId = #{userId} and userId = #{group} and type = "group"
+    </delete>
+
+    <select id="searchDialogs" resultMap="dialogsMap">
+        select * from dialogs,userinfo where dialogs.userid = userinfo.userid and dialogs.hostuserid = #{userId} and type = "people"
+    </select>
+
+    <select id="searchGroupDialogs" resultMap="dialogsGroupMap">
+        select * from dialogs
+        where dialogs.hostuserid = #{userId}
+        and type = "group"
+    </select>
+
+    <select id="searchGroupUserInfo" resultType="org.example.entity.UserInfo">
+        select * from groupchat,userinfo where groupchat.group = #{group}  and
+        userinfo.userid = groupchat.userId
+    </select>
+
+    <select id="searchDialogGroup" resultType="integer">
+        select hostuserid FROM dialogs where hostuserid = #{userId} and userid = #{group} and type = "group"
+    </select>
+
+    <select id="searchDialog" resultMap="dialogsMap">
+        select * from dialogs where hostUserId = #{hostUserId} and userId = #{userId} or hostUserId = #{userId} and userId = #{hostUserId}
+    </select>
+
+    <select id="selectDialog" resultType="org.example.entity.Dialog">
+        select * from dialogs where hostUserId = #{hostUserId} and userId = #{userId}
+    </select>
+
+    <resultMap id="dialogsGroupMap" type="org.example.entity.Dialog">
+        <id property="id" column="userId"/>
+        <result property="type" column="type"/>
+        <result property="name" column="name"/>
+    </resultMap>
+
+    <resultMap id="dialogsMap" type="org.example.entity.Dialog">
+        <id property="id" column="userId"/>
+        <result property="type" column="type"/>
+        <association property="userInfo" javaType="org.example.entity.UserInfo">
+            <result property="userId" column="userId"></result>
+            <result property="username" column="username"></result>
+            <result property="city" column="city"></result>
+            <result property="personalProfile" column="personalProfile"></result>
+            <result property="sex" column="sex"></result>
+            <result property="age" column="age"></result>
+            <result property="name" column="name"></result>
+            <result property="imgId" column="imgId"></result>
+        </association>
+    </resultMap>
+
+    <insert id="insertDialog">
+        insert into dialogs(hostUserId,userId,name,type) values(#{hostUserId},#{userId},#{username},"people")
+    </insert>
+
+    <select id="selectGroupName" resultType="java.lang.String">
+        select groupName FROM group_info where id = #{group}
+    </select>
+
+    <insert id="insertDialogGroup">
+        insert into dialogs(hostUserId,userId,name,type) values(#{userId},#{group},#{name},"group")
+    </insert>
+
+</mapper>

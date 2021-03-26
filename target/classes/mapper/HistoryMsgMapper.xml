@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.mapper.HistoryMsgManagerMapper">
+    <delete id="deleteHistoryForAll">
+        delete from message where sendUserId = #{send} and receiveUserId = #{receive} or sendUserId = #{receive} and receiveUserId = #{send}
+    </delete>
+
+    <select id="searchHistoryBySearch" resultMap="historyMessageMap">
+        select * from
+        (select message.*
+        from
+        message,message_affiliation
+        where
+        ((sendUserId = #{send} and receiveUserId = #{receive})
+        or (sendUserId = #{receive} and receiveUserId = #{send}))
+        AND message_affiliation.msgId = message.id
+        AND message_affiliation.userId = #{send})
+        TABLE_MESSAGE
+        WHERE
+        text like CONCAT("%",#{search},"%") order by id desc
+    </select>
+
+    <select id="searchHistoryBySearchGroup" resultMap="historyMessageGroupMap">
+        select * from
+        (select message_group.*
+        from
+        message_group,message_affiliation_group
+        where
+        message_group.`group` = #{group}
+        AND message_affiliation_group.msgId = message_group.id
+        AND message_affiliation_group.userId = #{userId})
+        TABLE_MESSAGE
+        WHERE
+        text like CONCAT("%",#{search},"%") order by id desc
+    </select>
+
+    <select id="searchHistoryByOwner" resultMap="historyMessageMap">
+        select a.* from message a,message_affiliation b where (sendUserId = #{send} and receiveUserId = #{receive}) and b.msgId = a.id and b.userId = #{owner} order by id desc
+    </select>
+
+    <select id="searchHistoryByOwnerGroup" resultMap="historyMessageGroupMap">
+        select a.* from message_group a,message_affiliation_group b where a.`group` = #{group} and b.msgId = a.id and b.userId = #{owner} and senduserid = #{userId} order by id desc
+    </select>
+
+    <select id="searchHistoryByType" resultMap="historyMessageMap">
+        select * from
+        (select a.* from
+        message a,message_affiliation b
+        where ((sendUserId = #{send} and receiveUserId = #{receive}) or (sendUserId = #{receive} and receiveUserId = #{send}))
+        AND a.id = b.msgId and b.userId = #{send}) table_message
+        where type != "text" order by id desc
+    </select>
+
+    <select id="searchHistoryByTypeGroup" resultMap="historyMessageGroupMap">
+        select * from
+        (select a.* from
+        message_group a,message_affiliation_group b
+        where a.`group` = #{group}
+        AND a.id = b.msgId and b.userId = #{userId}) table_message
+        where type != "text" order by id desc
+    </select>
+
+    <select id="searchHistoryByDate" resultMap="historyMessageMap">
+        select * from
+        (select a.* from
+        message a,message_affiliation b where
+        ((sendUserId = #{send} and receiveUserId = #{receive})
+        or (sendUserId = #{receive} and receiveUserId = #{send}))
+        AND a.id = b.msgId and b.userId = #{send})
+        table_message
+        where date(createDate) = #{date}
+        order by id desc
+    </select>
+
+    <select id="searchHistoryByDateGroup" resultMap="historyMessageGroupMap">
+        select * from
+        (select a.* from
+        message_group a,message_affiliation_group b where
+        a.`group` = #{group}
+        AND a.id = b.msgId and b.userId = #{userId})
+        table_message
+        where date(createDate) = #{date}
+        order by id desc
+    </select>
+
+    <resultMap id="historyMessageMap" type="Message">
+        <result property="userId" column="sendUserId"/>
+        <result property="text" column="text"/>
+        <result property="imgId" column="imgId"/>
+        <result property="receiveId" column="receiveUserId"/>
+        <result property="createTime" column="createDate"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+    <resultMap id="historyMessageGroupMap" type="Message">
+        <result property="userId" column="sendUserId"/>
+        <result property="text" column="text"/>
+        <result property="imgId" column="imgId"/>
+        <result property="receiveId" column="group"/>
+        <result property="createTime" column="createDate"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+</mapper>

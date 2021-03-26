@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.example.mapper.MessageManagerMapper">
+    <insert id="sendMessage" useGeneratedKeys="true" keyProperty="id" parameterType="org.example.entity.Message">
+        insert into message(sendUserId,text,receiveUserId,createDate,type) values(#{message.userId},#{message.text},#{message.receiveId},#{message.createTime},#{message.type})
+    </insert>
+
+    <insert id="sendMessageGroup" useGeneratedKeys="true" keyProperty="id" parameterType="org.example.entity.Message">
+        insert into message_group(sendUserId,text,`group`,createDate,type) values(#{message.userId},#{message.text},#{message.receiveId},#{message.createTime},#{message.type})
+    </insert>
+
+    <insert id="sendImageMessageGroup" useGeneratedKeys="true" keyProperty="id" parameterType="org.example.entity.Message">
+        insert into message_group(sendUserId,imgId,`group`,createDate,type) values(#{message.userId},#{message.imgId},#{message.receiveId},#{message.createTime},#{message.type})
+    </insert>
+
+    <select id="historyMessage" resultMap="historyMessageMap">
+        select * from message a ,message_affiliation b
+        WHERE a.id = b.msgId
+        and
+        b.userId = #{userId}
+        AND (
+        (a.senduserid =  #{userId}  AND a.receiveuserid =  #{userId2} )
+        or
+        (a.senduserid =  #{userId2}  AND a.receiveuserid =  #{userId} ))
+        ORDER BY a.id
+    </select>
+
+    <select id="historyMessageGroup" resultMap="lastMessageGroupMap">
+        select message_group.* from message_group,message_affiliation_group
+        where message_group.`group` = #{group}
+        AND message_affiliation_group.msgId = message_group.id
+        AND message_affiliation_group.userId = #{userId}
+        ORDER BY createdate asc
+    </select>
+
+    <select id="lastMessageGroup" resultMap="lastMessageGroupMap">
+        select message_group.* from message_group,message_affiliation_group
+        where message_group.`group` = #{group}
+        AND message_affiliation_group.msgId = message_group.id
+        AND message_affiliation_group.userId = #{userId}
+        ORDER BY createdate desc LIMIT 0,1
+    </select>
+
+    <select id="lastMessage" resultMap="lastMessageMap">
+        select * from message,message_affiliation
+        where
+        ((receiveUserId = #{hostUserId} and sendUserId = #{userId})
+        or
+        (receiveUserId = #{userId} and sendUserId = #{hostUserId}))
+        AND
+        message.id = message_affiliation.msgId
+        AND message_affiliation.userId = #{hostUserId}
+        order by message.id desc
+        limit 0,1
+    </select>
+
+    <select id="searchUserAccount" resultType="org.example.entity.UserAccount">
+        select * from useraccount where userId = #{userId}
+    </select>
+
+    <insert id="insertUnreadMessage">
+        insert into unreadmessage(sendUserId,text,imgId,receiveUserId,createTime,type) values(#{sendId},#{text},#{imgId},#{receiveId},#{createTime},#{type})
+    </insert>
+
+    <insert id="sendImageMessage" useGeneratedKeys="true" keyProperty="id" parameterType="org.example.entity.Message">
+        insert into message(sendUserId,imgId,receiveUserId,createDate,type) values(#{message.userId},#{message.imgId},#{message.receiveId},#{message.createTime},#{message.type})
+    </insert>
+
+    <insert id="sendImage">
+        insert into img(path) values(#{path})
+    </insert>
+
+    <insert id="insertMsgAffiliation">
+        insert into message_affiliation(userId,msgId) value(#{userId},#{msgId}),(#{userId2},#{msgId})
+    </insert>
+
+    <select id="selectImageId" resultType="int">
+        select imgId from img where path = #{path}
+    </select>
+
+    <resultMap id="lastMessageMap" type="Message">
+        <result property="userId" column="sendUserId"/>
+        <result property="text" column="text"/>
+        <result property="imgId" column="imgId"/>
+        <result property="receiveId" column="receiveUserId"/>
+        <result property="createTime" column="createDate"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+    <resultMap id="lastMessageGroupMap" type="Message">
+        <result property="userId" column="sendUserId"/>
+        <result property="text" column="text"/>
+        <result property="imgId" column="imgId"/>
+        <result property="receiveId" column="group"/>
+        <result property="createTime" column="createDate"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+    <resultMap id="historyMessageMap" type="Message">
+        <result property="userId" column="sendUserId"/>
+        <result property="text" column="text"/>
+        <result property="imgId" column="imgId"/>
+        <result property="receiveId" column="receiveUserId"/>
+        <result property="createTime" column="createDate"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+    <select id="searchOnline" resultMap="historyMessageMap">
+        select * from online where userId = #{receiveUserId} and receiveUserId = #{userId}
+    </select>
+
+    <select id="searchUnreadMessage" resultMap="historyMessageMap">
+        select * from unreadmessage where receiveUserId = #{userId}
+    </select>
+
+    <select id="searchDialogUnreadMessage" resultType="integer">
+        select count(*) from unreadmessage where receiveUserId = #{userId} and sendUserId = #{sendUserId}
+    </select>
+
+    <select id="searchDialogUnreadMessageGroup" resultType="integer">
+        select count(*) from unreadmessage_group where `group` = #{group} and hostId = #{userId}
+    </select>
+
+    <delete id="resetUnreadMessageGroup">
+        delete from unreadmessage_group where `group` = #{group} and hostId = #{userId}
+    </delete>
+
+    <insert id="insertUnreadMessageGroup">
+        insert into unreadmessage_group(msgId,`group`,hostId) values(#{msgId},#{group},#{userId})
+    </insert>
+
+    <insert id="insertMsgAffiliationGroup">
+        insert into message_affiliation_group(userId,msgId,`group`)
+        value(#{userId},#{msgId},#{group})
+    </insert>
+
+    <delete id="deleteMsgAffiliationGroup">
+        DELETE FROM message_affiliation_group
+        where userId = #{userId} and `group` = #{group}
+    </delete>
+
+    <select id="selectImagePath" resultType="string">
+        select path from img where imgId = #{imgId}
+    </select>
+
+    <select id="searchMsgId" resultType="integer">
+        select * from message where sendUserId = #{userId} and receiveUserId = #{userId2} and createdate = #{date}
+    </select>
+
+    <delete id="resetUnreadMessage">
+        delete from unreadmessage where sendUserId = #{userId2} and receiveUserId = #{userId}
+    </delete>
+
+    <delete id="deleteMsg">
+        DELETE FROM message_affiliation
+        where
+        msgId in
+        (select id from message where
+        (senduserid = #{userId} and receiveuserid = #{userId2}) or
+        (senduserid = #{userId2} and receiveuserid = #{userId})) AND
+        userId = #{userId}
+    </delete>
+
+    <select id="selectGroupMenber" resultType="int">
+        select userId from groupchat where `group` = #{group} and userId != #{userId}
+    </select>
+
+</mapper>

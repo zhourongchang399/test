@@ -1,0 +1,38 @@
+server:
+  port: 8088
+  tomcat:
+    uri-encoding: UTF-8
+#  http-port: 80
+#  ssl:
+#    key-store: classpath:tomcat.keystore
+#    keyAlias: tomcat
+#    key-store-password: 123456
+#    keyStoreType: JKS
+#
+#security:
+#  require-ssl: true
+
+#spring:
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://39.96.83.89:3307/apphw?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8
+#    username: root
+#    password: 951753
+
+spring:
+  mvc:
+    static-path-pattern: /image/**
+  resources:
+    static-locations: file:E:\IdeaProjects\HWappServer\src\main\resources\static\image\
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/apphw?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: 123456
+
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath:/mapper/*Mapper.xml
+  type-aliases-package: org.example.entity

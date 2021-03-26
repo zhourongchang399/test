@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.example.mapper.BlackListManagerMapper">
+
+
+    <resultMap id="BlackListMap" type="org.example.entity.UserInfo">
+            <result property="userId" column="userId"></result>
+            <result property="username" column="username"></result>
+            <result property="city" column="city"></result>
+            <result property="personalProfile" column="personalProfile"></result>
+            <result property="sex" column="sex"></result>
+            <result property="age" column="age"></result>
+            <result property="name" column="name"></result>
+            <result property="imgId" column="imgId"></result>
+    </resultMap>
+
+    <insert id="insertBlackList">
+        insert into blacklist(hostId,userId) values(#{hostId},#{userId})
+    </insert>
+
+    <delete id="deleteBlackList">
+        DELETE FROM blacklist where hostId = #{hostId} and userId = #{userId}
+    </delete>
+
+    <select id="searchBlackList" resultMap="BlackListMap">
+        SELECT userinfo.*
+        from blacklist,userinfo
+        where blacklist.userId = userinfo.userid
+        and blacklist.hostId = #{hostId}
+    </select>
+
+    <select id="searchBlackListByOne" resultType="org.example.entity.UserInfo">
+        SELECT userinfo.*
+        from blacklist,userinfo
+        where blacklist.userId = userinfo.userid
+        and (blacklist.hostId = #{hostId} and blacklist.userId = #{userId})
+        or (blacklist.userId = #{hostId} and blacklist.hostId = #{userId})
+    </select>
+
+
+</mapper>

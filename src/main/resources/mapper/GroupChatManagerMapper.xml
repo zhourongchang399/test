@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.example.mapper.GroupChatManagerMapper">
+
+    <insert id="insertGroupChat">
+        insert into groupchat(`group`,userId) values(#{group},#{userId})
+    </insert>
+
+    <insert id="insertNewGroupChat" useGeneratedKeys="true" keyProperty="id" parameterType="org.example.entity.Group">
+        insert into group_info(groupName) value(#{name.groupName})
+    </insert>
+
+    <update id="changeGroupChatName">
+        update dialogs set name = #{name} where userId = #{group} and type = "group"
+    </update>
+
+    <delete id="deleteGroupChatSomeone">
+        delete from groupchat where `group` = #{group} and userId = #{userId}
+    </delete>
+
+    <update id="updateGroupChatName">
+        update group_info set groupName = #{name} where id = #{group}
+    </update>
+
+    <select id="selectGroupChat" resultType="org.example.entity.UserInfo">
+        select userinfo.* FROM groupchat,userinfo WHERE groupchat.userId = userinfo.userid and groupchat.`group` = #{group}
+    </select>
+
+    <select id="selectHismsgMenber" resultType="org.example.entity.UserInfo">
+        select DISTINCT b.* from message_group a,userinfo b where a.`group` = #{group} and a.senduserid = b.userid
+    </select>
+
+</mapper>

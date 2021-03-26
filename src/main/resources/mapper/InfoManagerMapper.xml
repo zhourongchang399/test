@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.mapper.InfoManagerMapper">
+
+
+    <insert id="sendInfo">
+        insert into info(sendUserId,receiveUserId,text,status) values(#{send},#{receive},#{text},"null")
+    </insert>
+
+    <update id="changeInfoStatus">
+        update info set status = #{status} where sendUserId = #{send} and receiveUserId = #{receive}
+    </update>
+
+    <delete id="deleteInfo">
+        delete from info where sendUserId = #{send} and receiveUserId = #{receive}
+    </delete>
+
+    <delete id="deleteInfoForAll">
+        delete from info where receiveUserId = #{userId}
+    </delete>
+
+    <select id="searchInfo" resultType="org.example.entity.Info">
+        select * from info where sendUserId = #{send} and receiveUserId = #{receive};
+    </select>
+
+    <select id="searchInfos" resultMap="infoMap">
+        select * from info,userinfo where receiveUserId = #{receive} and userinfo.userId = info.sendUserId;
+    </select>
+
+    <resultMap id="infoMap" type="org.example.entity.Info">
+        <id property="id" column="info.id"/>
+        <id property="send" column="sendUserId"/>
+        <id property="receive" column="receiveUserId"/>
+        <id property="text" column="text"/>
+        <id property="status" column="status"/>
+        <association property="userInfo" javaType="org.example.entity.UserInfo">
+            <result property="userId" column="userId"></result>
+            <result property="username" column="username"></result>
+            <result property="city" column="city"></result>
+            <result property="personalProfile" column="personalProfile"></result>
+            <result property="sex" column="sex"></result>
+            <result property="age" column="age"></result>
+            <result property="name" column="name"></result>
+            <result property="imgId" column="imgId"></result>
+        </association>
+    </resultMap>
+
+</mapper>

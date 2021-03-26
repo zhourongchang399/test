@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.mapper.UserAccountMapper">
+    <insert id="insertUserAccount">
+        insert into useraccount(username,password,phone) values(#{username},#{password},#{phone})
+    </insert>
+
+    <insert id="onlineUserAccount">
+        insert into online(userId,receiveUserId) values(#{userId},#{receiveUserId})
+    </insert>
+
+    <insert id="insertOnlineList">
+        insert into onlinelist(userId) values(#{userId})
+    </insert>
+
+    <update id="updateImg">
+        update userinfo set imgId = #{imgId} where userId = #{userId}
+    </update>
+
+    <update id="updateUserAccountByPhone">
+        update useraccount set password = #{password} where phone = #{phone}
+    </update>
+
+    <update id="updateUserAccount">
+        update useraccount set password = #{password} where userName = #{username}
+    </update>
+
+    <delete id="offlineUserAccount">
+        delete from online where userId = #{userId}
+    </delete>
+
+    <delete id="deleteOnlineListForALLServer">
+        delete from onlinelist
+    </delete>
+
+    <delete id="deleteOnlineList">
+        delete from onlinelist where userId = #{userId}
+    </delete>
+
+    <select id="queryUserAccount" resultType="org.example.entity.UserAccount">
+        select * from useraccount where username = #{username} and password = #{password}
+    </select>
+
+    <select id="queryUserAccountIf" resultType="org.example.entity.UserAccount">
+        select * from useraccount where username = #{username}
+    </select>
+
+    <select id="queryUserAccountLike" resultType="org.example.entity.UserInfo">
+        select * from userinfo where 1=1
+        <choose>
+            <when test="#{username} != null and #{username} !=''">
+                and username like concat('%',#{username},'%')
+                or name like concat('%',#{username},'%')
+            </when>
+        </choose>
+    </select>
+
+    <select id="selectOnlineList" resultType="integer">
+        select userId from onlinelist where userId = #{userId}
+    </select>
+
+    <select id="queryUserAccountByPhone" resultType="org.example.entity.UserAccount">
+        select * from useraccount where phone = #{phone}
+    </select>
+
+</mapper>
